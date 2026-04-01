@@ -596,9 +596,9 @@ function testCertificateGeneration() {
 // ============================================================================
 
 /**
- * Generate certificate HTML matching the approved Canva template design
+ * Generate certificate HTML matching the TrueCOA certificate design
  * Used for the main certificate view (desktop-optimized, responsive)
- * Includes: Medium, Condition, Description, Notes/Provenance
+ * Features: gray header bar with QR, watermark background, two-column layout
  */
 function generateCertHTML(d) {
   return `<!DOCTYPE html>
@@ -610,11 +610,7 @@ function generateCertHTML(d) {
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Source+Sans+Pro:ital,wght@0,400;0,600;1,400&display=swap');
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: 'Source Sans Pro', sans-serif;
@@ -624,346 +620,318 @@ function generateCertHTML(d) {
     }
 
     .certificate {
-      background: #fff;
       max-width: 900px;
       margin: 0 auto;
-      border: 4px solid #6b5b95;
-      padding: 40px;
+      overflow: hidden;
     }
 
-    .header {
-      text-align: center;
-      margin-bottom: 30px;
+    /* --- Header Bar --- */
+    .header-bar {
+      background: linear-gradient(135deg, #8a8a8a 0%, #b0b0b0 50%, #8a8a8a 100%);
+      padding: 28px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
-    .header h1 {
+    .header-bar h1 {
       font-family: 'Cinzel', serif;
-      font-size: 34px;
-      font-weight: 600;
-      color: #c9a962;
-      letter-spacing: 8px;
+      font-size: 30px;
+      font-weight: 700;
+      color: #2c2c3a;
+      letter-spacing: 6px;
       text-transform: uppercase;
     }
 
-    .content {
-      display: flex;
-      gap: 40px;
-      margin-bottom: 30px;
+    .header-qr {
+      text-align: center;
+      flex-shrink: 0;
+      margin-left: 20px;
     }
 
-    .artwork {
+    .header-qr img {
+      width: 70px;
+      height: 70px;
+      display: block;
+    }
+
+    .header-qr .qr-code-label {
+      font-size: 16px;
+      font-weight: 700;
+      color: #d9534f;
+      margin-top: 4px;
+    }
+
+    /* --- Body --- */
+    .body-area {
+      position: relative;
+      background: #f9f9f9;
+      padding: 40px;
+    }
+
+    .watermark {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0.08;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .body-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      gap: 40px;
+    }
+
+    /* --- Left Column: Artwork --- */
+    .artwork-col {
       flex: 0 0 340px;
     }
 
-    .artwork img {
+    .artwork-frame {
+      border: 6px solid #c0c0c0;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.15);
+      background: #fff;
+      padding: 6px;
+    }
+
+    .artwork-frame img {
       width: 100%;
       height: auto;
       display: block;
     }
 
-    .details-area {
+    /* --- Right Column: Details --- */
+    .details-col {
       flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: center;
+    }
+
+    .section-header {
+      font-family: 'Cinzel', serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #2c2c3a;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #ccc;
     }
 
     .detail-row {
       display: flex;
       justify-content: space-between;
-      padding: 8px 0;
+      padding: 7px 0;
     }
 
     .detail-label {
       font-weight: 600;
-      color: #c9a962;
-      font-size: 15px;
+      color: #444;
+      font-size: 14px;
     }
 
     .detail-value {
-      color: #333;
-      font-size: 15px;
+      color: #222;
+      font-size: 14px;
       text-align: right;
+      max-width: 60%;
+      word-break: break-word;
     }
 
-    .section-spacer {
-      height: 30px;
+    .section-gap {
+      height: 24px;
     }
 
-    .description-section {
-      margin: 15px 0;
-      padding: 12px 0;
-      border-top: 1px solid #eee;
-    }
-
-    .description-section .section-title {
-      font-weight: 600;
-      color: #c9a962;
-      font-size: 13px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-
-    .description-section .section-text {
-      font-size: 14px;
-      color: #333;
-      line-height: 1.6;
-    }
-
-    .notes-section {
-      margin: 10px 0 15px 0;
-      padding: 12px 0;
-      border-top: 1px solid #eee;
-    }
-
-    .notes-section .section-title {
-      font-weight: 600;
-      color: #c9a962;
-      font-size: 13px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-
-    .notes-section .section-text {
-      font-size: 14px;
-      color: #333;
-      line-height: 1.6;
-      font-style: italic;
-    }
-
-    .footer {
-      border-top: 1px solid #eee;
-      padding-top: 25px;
-      padding-bottom: 0px;
-    }
-
-    .footer-content {
+    /* --- Footer Bar --- */
+    .footer-bar {
+      background: #f0f0f0;
+      border-top: 2px solid #ccc;
+      padding: 18px 40px;
       display: flex;
       justify-content: space-between;
-      align-items: flex-end;
+      align-items: center;
     }
 
     .footer-left {
-      flex: 1;
-    }
-
-    .provenance {
-      font-style: italic;
-      font-size: 14px;
-      color: #555;
-      line-height: 1.6;
-      margin-bottom: 20px;
-      max-width: 700px;
-    }
-
-    .powered-by {
       display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0px;
+      align-items: center;
+      gap: 16px;
     }
 
-    .powered-label {
+    .footer-left .powered-label {
       font-weight: 600;
-      font-size: 14px;
-      color: #333;
+      font-size: 13px;
+      color: #555;
     }
 
-    .powered-logos {
+    .footer-logos {
       display: flex;
       align-items: center;
-      justify-content: flex-start;
-      gap: 30px;
-      margin-top: 8px;
+      gap: 20px;
     }
 
-    .partner-logo {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .footer-right {
+      text-align: right;
     }
 
-    .qr-section {
-      text-align: center;
+    .footer-right .secured-text {
+      font-style: italic;
+      font-size: 13px;
+      color: #555;
     }
 
-    .qr-section img {
-      width: 70px;
-      height: 70px;
-    }
-
-    .qr-code-label {
-      font-size: 18px;
-      color: #333;
-      font-weight: 700;
-      margin-top: 8px;
+    .footer-right .tagline {
+      font-size: 12px;
+      color: #777;
+      margin-top: 2px;
     }
 
     @media (max-width: 700px) {
-      .certificate {
-        padding: 20px;
-      }
-      .content {
+      .header-bar {
+        padding: 18px 20px;
         flex-direction: column;
-        gap: 25px;
+        text-align: center;
+        gap: 12px;
       }
-      .artwork {
-        flex: none;
-        width: 100%;
+      .header-bar h1 {
+        font-size: 18px;
+        letter-spacing: 3px;
       }
-      .header h1 {
-        font-size: 20px;
-        letter-spacing: 4px;
-      }
-      .footer-content {
+      .header-qr { margin-left: 0; }
+      .body-area { padding: 20px; }
+      .body-content {
         flex-direction: column;
-        align-items: center;
         gap: 20px;
       }
-      .footer-left {
-        width: 100%;
+      .artwork-col { flex: none; width: 100%; }
+      .footer-bar {
+        flex-direction: column;
+        gap: 12px;
         text-align: center;
+        padding: 15px 20px;
       }
-      .provenance {
-        text-align: center;
-      }
-      .powered-by {
-        align-items: center;
-        width: 100%;
-      }
-      .powered-logos {
-        justify-content: center;
-        gap: 25px;
-      }
-      .qr-section {
-        align-self: center;
-      }
+      .footer-left { flex-direction: column; }
+      .footer-right { text-align: center; }
     }
   </style>
 </head>
 <body>
   <div class="certificate">
-    <div class="header">
+
+    <!-- Header Bar -->
+    <div class="header-bar">
       <h1>Certificate of Authenticity</h1>
-    </div>
-
-    <div class="content">
-      <div class="artwork">
-        ${d.image ? `<img src="${esc(d.image)}" alt="${esc(d.title)}" onerror="this.style.display='none'" />` : '<div style="width:100%;height:300px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;color:#999;">No image</div>'}
-      </div>
-
-      <div class="details-area">
-        <div class="detail-row">
-          <span class="detail-label">Artist:</span>
-          <span class="detail-value">${esc(d.artist)}</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Title:</span>
-          <span class="detail-value">${esc(d.title)}</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Year:</span>
-          <span class="detail-value">${esc(String(d.year))}</span>
-        </div>
-        ${d.medium ? `
-        <div class="detail-row">
-          <span class="detail-label">Medium:</span>
-          <span class="detail-value">${esc(d.medium)}</span>
-        </div>
-        ` : ''}
-        <div class="detail-row">
-          <span class="detail-label">Dimensions:</span>
-          <span class="detail-value">${esc(d.dims)}</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Edition:</span>
-          <span class="detail-value">${esc(d.edition)}</span>
-        </div>
-        ${d.condition ? `
-        <div class="detail-row">
-          <span class="detail-label">Condition:</span>
-          <span class="detail-value">${esc(d.condition)}</span>
-        </div>
-        ` : ''}
-
-        <div class="section-spacer"></div>
-
-        <div class="detail-row">
-          <span class="detail-label">Date:</span>
-          <span class="detail-value">${esc(d.transactionDate)}</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Assignor:</span>
-          <span class="detail-value">TrueCOA</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Assignee:</span>
-          <span class="detail-value">${esc(d.assignee)}</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Blockchain:</span>
-          <span class="detail-value">${esc(d.blockchainUrl)}</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">NFT:</span>
-          <span class="detail-value">${esc(d.nftUrl)}</span>
-        </div>
+      <div class="header-qr">
+        <img src="${d.qr}" alt="QR Code" />
+        <div class="qr-code-label">#${esc(d.code)}</div>
       </div>
     </div>
 
-    ${d.description ? `
-    <div class="description-section">
-      <div class="section-title">Description</div>
-      <div class="section-text">${esc(d.description)}</div>
-    </div>
-    ` : ''}
+    <!-- Body with watermark -->
+    <div class="body-area">
+      ${d.image ? `<div class="watermark" style="background-image: url('${esc(d.image)}');"></div>` : ''}
+      <div class="body-content">
 
-    ${d.notes ? `
-    <div class="notes-section">
-      <div class="section-title">Provenance / Notes</div>
-      <div class="section-text">${esc(d.notes)}</div>
-    </div>
-    ` : ''}
-
-    <div class="footer">
-      <div class="footer-content">
-        <div class="footer-left">
-          <p class="provenance">
-            Backed by <strong>ScoreDetect</strong> blockchain verification and a unique NFT on the <strong>Polygon</strong> network &mdash; the first of its kind ensuring artwork authenticity.
-          </p>
-
-          <div class="powered-by">
-            <span class="powered-label">Powered by:</span>
-            <div class="powered-logos">
-              <a href="https://scoredetect.com" target="_blank" class="partner-logo" title="ScoreDetect - Digital authenticity verification">
-                <img src="${LOGO_SCOREDETECT_URL}" alt="ScoreDetect" style="height:35px;width:auto;" />
-              </a>
-              <a href="https://polygon.technology" target="_blank" class="partner-logo" title="Polygon - Blockchain network">
-                <img src="${LOGO_POLYGON_URL}" alt="Polygon" style="height:40px;width:auto;" />
-              </a>
-              <span class="partner-logo" title="TrueCOA - Trusted since 2012">
-                <img src="${LOGO_GAUNTLET_URL}" alt="TrueCOA" style="height:45px;width:auto;" />
-              </span>
-            </div>
+        <!-- Left: Artwork -->
+        <div class="artwork-col">
+          <div class="artwork-frame">
+            ${d.image ? `<img src="${esc(d.image)}" alt="${esc(d.title)}" onerror="this.style.display='none'" />` : '<div style="width:100%;height:300px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;color:#999;">No image</div>'}
           </div>
         </div>
 
-        <div class="qr-section">
-          <img src="${d.qr}" alt="QR Code" />
-          <div class="qr-code-label">#${esc(d.code)}</div>
+        <!-- Right: Details -->
+        <div class="details-col">
+          <div class="section-header">Details</div>
+          <div class="detail-row">
+            <span class="detail-label">Artist:</span>
+            <span class="detail-value">${esc(d.artist)}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Title:</span>
+            <span class="detail-value">${esc(d.title)}</span>
+          </div>
+          ${d.medium ? `
+          <div class="detail-row">
+            <span class="detail-label">Medium:</span>
+            <span class="detail-value">${esc(d.medium)}</span>
+          </div>` : ''}
+          ${d.dims ? `
+          <div class="detail-row">
+            <span class="detail-label">Dimensions:</span>
+            <span class="detail-value">${esc(d.dims)}</span>
+          </div>` : ''}
+          ${d.edition ? `
+          <div class="detail-row">
+            <span class="detail-label">Edition:</span>
+            <span class="detail-value">${esc(d.edition)}</span>
+          </div>` : ''}
+          ${d.condition ? `
+          <div class="detail-row">
+            <span class="detail-label">Condition:</span>
+            <span class="detail-value">${esc(d.condition)}</span>
+          </div>` : ''}
+
+          <div class="section-gap"></div>
+
+          <div class="section-header">Digital Authentication</div>
+          <div class="detail-row">
+            <span class="detail-label">Blockchain:</span>
+            <span class="detail-value">${esc(d.blockchainUrl)}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Certificate:</span>
+            <span class="detail-value">${esc(d.code)}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Date:</span>
+            <span class="detail-value">${esc(d.transactionDate)}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Assignor:</span>
+            <span class="detail-value">TrueCOA</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Assignee:</span>
+            <span class="detail-value">${esc(d.assignee)}</span>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- Footer Bar -->
+    <div class="footer-bar">
+      <div class="footer-left">
+        <span class="powered-label">Powered by:</span>
+        <div class="footer-logos">
+          <a href="https://scoredetect.com" target="_blank" title="ScoreDetect">
+            <img src="${LOGO_SCOREDETECT_URL}" alt="ScoreDetect" style="height:30px;width:auto;" />
+          </a>
+          <a href="https://polygon.technology" target="_blank" title="Polygon">
+            <img src="${LOGO_POLYGON_URL}" alt="Polygon" style="height:34px;width:auto;" />
+          </a>
+        </div>
+      </div>
+      <div class="footer-right">
+        <div class="secured-text">Secured on the Polygon blockchain</div>
+        <div class="tagline">Transparent Authenticity</div>
+      </div>
+    </div>
+
   </div>
 </body>
 </html>`;
 }
 
 /**
- * Generate Mobile-optimized HTML (smaller, phone-friendly)
- * Includes: Medium, Condition, Description, Notes/Provenance
+ * Generate Mobile-optimized HTML (single-column, phone-friendly)
+ * Simplified version of the TrueCOA certificate design
  */
 function generateMobileHTML(d) {
   return `<!DOCTYPE html>
@@ -973,160 +941,149 @@ function generateMobileHTML(d) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>COA - ${esc(d.code)}</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Source+Sans+Pro:wght@400;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Source+Sans+Pro:ital,wght@0,400;0,600;1,400&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Source Sans Pro', sans-serif;
-      background: #f5f5f5;
-      padding: 15px;
+      background: #e8e8e8;
+      padding: 10px;
       min-height: 100vh;
     }
     .certificate {
-      background: #fff;
-      max-width: 400px;
+      max-width: 420px;
       margin: 0 auto;
-      border: 3px solid #6b5b95;
-      padding: 20px;
-      border-radius: 8px;
+      overflow: hidden;
+      border-radius: 6px;
     }
-    .header h1 {
+    /* Header */
+    .header-bar {
+      background: linear-gradient(135deg, #8a8a8a 0%, #b0b0b0 50%, #8a8a8a 100%);
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-bar h1 {
       font-family: 'Cinzel', serif;
-      font-size: 18px;
-      color: #c9a962;
-      letter-spacing: 4px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #2c2c3a;
+      letter-spacing: 3px;
       text-transform: uppercase;
-      text-align: center;
-      margin-bottom: 15px;
     }
-    .artwork img {
-      width: 100%;
-      height: auto;
-      display: block;
-      margin-bottom: 15px;
-      border-radius: 4px;
+    .header-qr { text-align: center; flex-shrink: 0; margin-left: 10px; }
+    .header-qr img { width: 50px; height: 50px; display: block; }
+    .header-qr .qr-code-label {
+      font-size: 12px; font-weight: 700; color: #d9534f; margin-top: 2px;
+    }
+    /* Body */
+    .body-area {
+      position: relative;
+      background: #f9f9f9;
+      padding: 18px;
+    }
+    .watermark {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0.08;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .body-content { position: relative; z-index: 1; }
+    /* Artwork */
+    .artwork-frame {
+      border: 4px solid #c0c0c0;
+      box-shadow: 1px 1px 6px rgba(0,0,0,0.12);
+      background: #fff;
+      padding: 4px;
+      margin-bottom: 18px;
+    }
+    .artwork-frame img { width: 100%; height: auto; display: block; }
+    /* Details */
+    .section-header {
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #2c2c3a;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      padding-bottom: 4px;
+      border-bottom: 2px solid #ccc;
     }
     .detail-row {
       display: flex;
       justify-content: space-between;
-      padding: 6px 0;
-      border-bottom: 1px solid #eee;
+      padding: 5px 0;
       font-size: 13px;
     }
-    .detail-label { font-weight: 600; color: #c9a962; }
-    .detail-value { color: #333; text-align: right; }
-    .section-spacer { height: 15px; }
-    .description-section {
-      margin: 12px 0;
-      padding: 10px 0;
-      border-top: 1px solid #eee;
-    }
-    .description-section .section-title {
-      font-weight: 600;
-      color: #c9a962;
-      font-size: 11px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-    .description-section .section-text {
-      font-size: 12px;
-      color: #333;
-      line-height: 1.5;
-    }
-    .notes-section {
-      margin: 8px 0 12px 0;
-      padding: 10px 0;
-      border-top: 1px solid #eee;
-    }
-    .notes-section .section-title {
-      font-weight: 600;
-      color: #c9a962;
-      font-size: 11px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-    .notes-section .section-text {
-      font-size: 12px;
-      color: #333;
-      line-height: 1.5;
-      font-style: italic;
-    }
-    .footer {
-      border-top: 1px solid #ddd;
-      padding-top: 15px;
-      margin-top: 15px;
+    .detail-label { font-weight: 600; color: #444; }
+    .detail-value { color: #222; text-align: right; max-width: 60%; word-break: break-word; }
+    .section-gap { height: 16px; }
+    /* Footer */
+    .footer-bar {
+      background: #f0f0f0;
+      border-top: 2px solid #ccc;
+      padding: 14px 18px;
       text-align: center;
     }
-    .provenance {
-      font-style: italic;
-      font-size: 11px;
-      color: #666;
-      margin-bottom: 12px;
-    }
-    .powered-logos {
+    .footer-left {
       display: flex;
-      justify-content: center;
       align-items: center;
-      gap: 20px;
-      margin-bottom: 15px;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 8px;
     }
-    .partner-logo { cursor: pointer; transition: transform 0.2s; }
-    .partner-logo:hover { transform: scale(1.1); }
-    .qr-section img { width: 80px; height: 80px; }
-    .qr-code-label { font-size: 14px; font-weight: 700; margin-top: 5px; }
+    .footer-left .powered-label { font-weight: 600; font-size: 11px; color: #555; }
+    .footer-logos {
+      display: flex; align-items: center; gap: 14px;
+    }
+    .secured-text { font-style: italic; font-size: 11px; color: #555; }
+    .tagline { font-size: 10px; color: #777; margin-top: 2px; }
   </style>
 </head>
 <body>
   <div class="certificate">
-    <div class="header">
+    <div class="header-bar">
       <h1>Certificate of Authenticity</h1>
-    </div>
-    ${d.image ? `<div class="artwork"><img src="${esc(d.image)}" alt="${esc(d.title)}" /></div>` : ''}
-    <div class="details">
-      <div class="detail-row"><span class="detail-label">Artist:</span><span class="detail-value">${esc(d.artist)}</span></div>
-      <div class="detail-row"><span class="detail-label">Title:</span><span class="detail-value">${esc(d.title)}</span></div>
-      <div class="detail-row"><span class="detail-label">Year:</span><span class="detail-value">${esc(String(d.year))}</span></div>
-      ${d.medium ? `<div class="detail-row"><span class="detail-label">Medium:</span><span class="detail-value">${esc(d.medium)}</span></div>` : ''}
-      <div class="detail-row"><span class="detail-label">Dimensions:</span><span class="detail-value">${esc(d.dims)}</span></div>
-      <div class="detail-row"><span class="detail-label">Edition:</span><span class="detail-value">${esc(d.edition)}</span></div>
-      ${d.condition ? `<div class="detail-row"><span class="detail-label">Condition:</span><span class="detail-value">${esc(d.condition)}</span></div>` : ''}
-      <div class="section-spacer"></div>
-      <div class="detail-row"><span class="detail-label">Date:</span><span class="detail-value">${esc(d.transactionDate)}</span></div>
-      <div class="detail-row"><span class="detail-label">Assignor:</span><span class="detail-value">TrueCOA</span></div>
-      <div class="detail-row"><span class="detail-label">Assignee:</span><span class="detail-value">${esc(d.assignee)}</span></div>
-      <div class="detail-row"><span class="detail-label">Blockchain:</span><span class="detail-value" style="font-size:11px;">${esc(d.blockchainUrl)}</span></div>
-      <div class="detail-row"><span class="detail-label">NFT:</span><span class="detail-value" style="font-size:11px;">${esc(d.nftUrl)}</span></div>
-    </div>
-    ${d.description ? `
-    <div class="description-section">
-      <div class="section-title">Description</div>
-      <div class="section-text">${esc(d.description)}</div>
-    </div>
-    ` : ''}
-    ${d.notes ? `
-    <div class="notes-section">
-      <div class="section-title">Provenance / Notes</div>
-      <div class="section-text">${esc(d.notes)}</div>
-    </div>
-    ` : ''}
-    <div class="footer">
-      <p class="provenance">Backed by <strong>ScoreDetect</strong> blockchain verification and a unique NFT on the <strong>Polygon</strong> network &mdash; the first of its kind ensuring artwork authenticity.</p>
-      <div class="powered-logos">
-        <a href="https://scoredetect.com" target="_blank" class="partner-logo" title="ScoreDetect - Digital authenticity verification">
-          <img src="${LOGO_SCOREDETECT_URL}" alt="ScoreDetect" style="height:28px;width:auto;" />
-        </a>
-        <a href="https://polygon.technology" target="_blank" class="partner-logo" title="Polygon - Blockchain network">
-          <img src="${LOGO_POLYGON_URL}" alt="Polygon" style="height:32px;width:auto;" />
-        </a>
-        <span class="partner-logo" title="TrueCOA - Trusted since 2012">
-          <img src="${LOGO_GAUNTLET_URL}" alt="TrueCOA" style="height:38px;width:auto;" />
-        </span>
-      </div>
-      <div class="qr-section">
-        <img src="${d.qr}" alt="QR Code" title="Scan to verify authenticity" />
+      <div class="header-qr">
+        <img src="${d.qr}" alt="QR Code" />
         <div class="qr-code-label">#${esc(d.code)}</div>
       </div>
+    </div>
+    <div class="body-area">
+      ${d.image ? `<div class="watermark" style="background-image: url('${esc(d.image)}');"></div>` : ''}
+      <div class="body-content">
+        ${d.image ? `<div class="artwork-frame"><img src="${esc(d.image)}" alt="${esc(d.title)}" /></div>` : ''}
+        <div class="section-header">Details</div>
+        <div class="detail-row"><span class="detail-label">Artist:</span><span class="detail-value">${esc(d.artist)}</span></div>
+        <div class="detail-row"><span class="detail-label">Title:</span><span class="detail-value">${esc(d.title)}</span></div>
+        ${d.medium ? `<div class="detail-row"><span class="detail-label">Medium:</span><span class="detail-value">${esc(d.medium)}</span></div>` : ''}
+        ${d.dims ? `<div class="detail-row"><span class="detail-label">Dimensions:</span><span class="detail-value">${esc(d.dims)}</span></div>` : ''}
+        ${d.edition ? `<div class="detail-row"><span class="detail-label">Edition:</span><span class="detail-value">${esc(d.edition)}</span></div>` : ''}
+        ${d.condition ? `<div class="detail-row"><span class="detail-label">Condition:</span><span class="detail-value">${esc(d.condition)}</span></div>` : ''}
+        <div class="section-gap"></div>
+        <div class="section-header">Digital Authentication</div>
+        <div class="detail-row"><span class="detail-label">Blockchain:</span><span class="detail-value" style="font-size:11px;">${esc(d.blockchainUrl)}</span></div>
+        <div class="detail-row"><span class="detail-label">Certificate:</span><span class="detail-value">${esc(d.code)}</span></div>
+        <div class="detail-row"><span class="detail-label">Date:</span><span class="detail-value">${esc(d.transactionDate)}</span></div>
+        <div class="detail-row"><span class="detail-label">Assignor:</span><span class="detail-value">TrueCOA</span></div>
+        <div class="detail-row"><span class="detail-label">Assignee:</span><span class="detail-value">${esc(d.assignee)}</span></div>
+      </div>
+    </div>
+    <div class="footer-bar">
+      <div class="footer-left">
+        <span class="powered-label">Powered by:</span>
+        <div class="footer-logos">
+          <a href="https://scoredetect.com" target="_blank"><img src="${LOGO_SCOREDETECT_URL}" alt="ScoreDetect" style="height:24px;width:auto;" /></a>
+          <a href="https://polygon.technology" target="_blank"><img src="${LOGO_POLYGON_URL}" alt="Polygon" style="height:28px;width:auto;" /></a>
+        </div>
+      </div>
+      <div class="secured-text">Secured on the Polygon blockchain</div>
+      <div class="tagline">Transparent Authenticity</div>
     </div>
   </div>
 </body>
@@ -1134,8 +1091,8 @@ function generateMobileHTML(d) {
 }
 
 /**
- * Generate PDF-optimized HTML (larger, print-ready)
- * Includes: Medium, Condition, Description, Notes/Provenance
+ * Generate PDF-optimized HTML (A4 print-ready)
+ * TrueCOA certificate design with watermark, optimized for print
  */
 function generatePDFHTML(d) {
   return `<!DOCTYPE html>
@@ -1144,167 +1101,175 @@ function generatePDFHTML(d) {
   <meta charset="UTF-8">
   <title>Certificate of Authenticity - ${esc(d.code)}</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Source+Sans+Pro:wght@400;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Source+Sans+Pro:ital,wght@0,400;0,600;1,400&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    @page { size: A4; margin: 0.5in; }
+    @page { size: A4; margin: 0; }
     body {
       font-family: 'Source Sans Pro', sans-serif;
       background: #fff;
-      padding: 40px;
+      padding: 0;
+      margin: 0;
     }
     .certificate {
-      max-width: 800px;
+      width: 210mm;
+      min-height: 297mm;
       margin: 0 auto;
-      border: 4px solid #6b5b95;
-      padding: 50px;
+      display: flex;
+      flex-direction: column;
     }
-    .header h1 {
+    /* Header */
+    .header-bar {
+      background: linear-gradient(135deg, #8a8a8a 0%, #b0b0b0 50%, #8a8a8a 100%);
+      padding: 30px 50px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .header-bar h1 {
       font-family: 'Cinzel', serif;
-      font-size: 38px;
-      color: #c9a962;
-      letter-spacing: 10px;
+      font-size: 32px;
+      font-weight: 700;
+      color: #2c2c3a;
+      letter-spacing: 7px;
       text-transform: uppercase;
-      text-align: center;
-      margin-bottom: 40px;
     }
-    .content {
+    .header-qr { text-align: center; flex-shrink: 0; margin-left: 24px; }
+    .header-qr img { width: 80px; height: 80px; display: block; }
+    .header-qr .qr-code-label {
+      font-size: 18px; font-weight: 700; color: #d9534f; margin-top: 5px;
+    }
+    /* Body */
+    .body-area {
+      position: relative;
+      background: #f9f9f9;
+      padding: 50px;
+      flex: 1;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .watermark {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0.08;
+      pointer-events: none;
+      z-index: 0;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .body-content {
+      position: relative;
+      z-index: 1;
       display: flex;
       gap: 50px;
-      margin-bottom: 40px;
     }
-    .artwork { flex: 0 0 380px; }
-    .artwork img { width: 100%; height: auto; display: block; border: 1px solid #ddd; }
-    .details-area { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+    /* Artwork */
+    .artwork-col { flex: 0 0 320px; }
+    .artwork-frame {
+      border: 6px solid #c0c0c0;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.12);
+      background: #fff;
+      padding: 6px;
+    }
+    .artwork-frame img { width: 100%; height: auto; display: block; }
+    /* Details */
+    .details-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .section-header {
+      font-family: 'Cinzel', serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: #2c2c3a;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #ccc;
+    }
     .detail-row {
       display: flex;
       justify-content: space-between;
-      padding: 12px 0;
-      border-bottom: 1px solid #eee;
-      font-size: 16px;
-    }
-    .detail-label { font-weight: 600; color: #c9a962; }
-    .detail-value { color: #333; text-align: right; }
-    .section-spacer { height: 30px; }
-    .description-section {
-      margin: 15px 0;
-      padding: 15px 0;
-      border-top: 1px solid #eee;
-    }
-    .description-section .section-title {
-      font-weight: 600;
-      color: #c9a962;
-      font-size: 14px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
-    .description-section .section-text {
+      padding: 9px 0;
       font-size: 15px;
-      color: #333;
-      line-height: 1.6;
     }
-    .notes-section {
-      margin: 10px 0 20px 0;
-      padding: 15px 0;
-      border-top: 1px solid #eee;
-    }
-    .notes-section .section-title {
-      font-weight: 600;
-      color: #c9a962;
-      font-size: 14px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
-    .notes-section .section-text {
-      font-size: 15px;
-      color: #333;
-      line-height: 1.6;
-      font-style: italic;
-    }
-    .footer {
-      border-top: 2px solid #6b5b95;
-      padding-top: 30px;
+    .detail-label { font-weight: 600; color: #444; }
+    .detail-value { color: #222; text-align: right; max-width: 60%; word-break: break-word; }
+    .section-gap { height: 28px; }
+    /* Footer */
+    .footer-bar {
+      background: #f0f0f0;
+      border-top: 2px solid #ccc;
+      padding: 20px 50px;
       display: flex;
       justify-content: space-between;
-      align-items: flex-end;
-    }
-    .footer-left { flex: 1; }
-    .provenance {
-      font-style: italic;
-      font-size: 14px;
-      color: #555;
-      margin-bottom: 20px;
-      max-width: 500px;
-    }
-    .powered-logos {
-      display: flex;
       align-items: center;
-      gap: 35px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
-    .partner-logo { cursor: pointer; transition: transform 0.2s, opacity 0.2s; }
-    .partner-logo:hover { transform: scale(1.1); opacity: 0.8; }
-    .qr-section { text-align: center; }
-    .qr-section img { width: 100px; height: 100px; cursor: pointer; transition: transform 0.2s; }
-    .qr-section:hover img { transform: scale(1.15); }
-    .qr-code-label { font-size: 20px; font-weight: 700; margin-top: 10px; }
+    .footer-left {
+      display: flex; align-items: center; gap: 18px;
+    }
+    .footer-left .powered-label { font-weight: 600; font-size: 14px; color: #555; }
+    .footer-logos { display: flex; align-items: center; gap: 24px; }
+    .footer-right { text-align: right; }
+    .footer-right .secured-text { font-style: italic; font-size: 14px; color: #555; }
+    .footer-right .tagline { font-size: 12px; color: #777; margin-top: 3px; }
   </style>
 </head>
 <body>
   <div class="certificate">
-    <div class="header">
+    <div class="header-bar">
       <h1>Certificate of Authenticity</h1>
-    </div>
-    <div class="content">
-      <div class="artwork">
-        ${d.image ? `<img src="${esc(d.image)}" alt="${esc(d.title)}" />` : '<div style="width:100%;height:400px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;color:#999;font-size:18px;">Artwork Image</div>'}
-      </div>
-      <div class="details-area">
-        <div class="detail-row"><span class="detail-label">Artist:</span><span class="detail-value">${esc(d.artist)}</span></div>
-        <div class="detail-row"><span class="detail-label">Title:</span><span class="detail-value">${esc(d.title)}</span></div>
-        <div class="detail-row"><span class="detail-label">Year:</span><span class="detail-value">${esc(String(d.year))}</span></div>
-        ${d.medium ? `<div class="detail-row"><span class="detail-label">Medium:</span><span class="detail-value">${esc(d.medium)}</span></div>` : ''}
-        <div class="detail-row"><span class="detail-label">Dimensions:</span><span class="detail-value">${esc(d.dims)}</span></div>
-        <div class="detail-row"><span class="detail-label">Edition:</span><span class="detail-value">${esc(d.edition)}</span></div>
-        ${d.condition ? `<div class="detail-row"><span class="detail-label">Condition:</span><span class="detail-value">${esc(d.condition)}</span></div>` : ''}
-        <div class="section-spacer"></div>
-        <div class="detail-row"><span class="detail-label">Date:</span><span class="detail-value">${esc(d.transactionDate)}</span></div>
-        <div class="detail-row"><span class="detail-label">Assignor:</span><span class="detail-value">TrueCOA</span></div>
-        <div class="detail-row"><span class="detail-label">Assignee:</span><span class="detail-value">${esc(d.assignee)}</span></div>
-        <div class="detail-row"><span class="detail-label">Blockchain:</span><span class="detail-value">${esc(d.blockchainUrl)}</span></div>
-        <div class="detail-row"><span class="detail-label">NFT:</span><span class="detail-value">${esc(d.nftUrl)}</span></div>
-      </div>
-    </div>
-    ${d.description ? `
-    <div class="description-section">
-      <div class="section-title">Description</div>
-      <div class="section-text">${esc(d.description)}</div>
-    </div>
-    ` : ''}
-    ${d.notes ? `
-    <div class="notes-section">
-      <div class="section-title">Provenance / Notes</div>
-      <div class="section-text">${esc(d.notes)}</div>
-    </div>
-    ` : ''}
-    <div class="footer">
-      <div class="footer-left">
-        <p class="provenance">Backed by <strong>ScoreDetect</strong> blockchain verification and a unique NFT on the <strong>Polygon</strong> network &mdash; the first of its kind ensuring artwork authenticity.</p>
-        <div class="powered-logos">
-          <a href="https://scoredetect.com" target="_blank" class="partner-logo" title="ScoreDetect - Digital authenticity verification">
-            <img src="${LOGO_SCOREDETECT_URL}" alt="ScoreDetect" style="height:40px;width:auto;" />
-          </a>
-          <a href="https://polygon.technology" target="_blank" class="partner-logo" title="Polygon - Blockchain network">
-            <img src="${LOGO_POLYGON_URL}" alt="Polygon" style="height:45px;width:auto;" />
-          </a>
-          <span class="partner-logo" title="TrueCOA - Trusted since 2012">
-            <img src="${LOGO_GAUNTLET_URL}" alt="TrueCOA" style="height:50px;width:auto;" />
-          </span>
-        </div>
-      </div>
-      <div class="qr-section" title="Scan to verify authenticity">
+      <div class="header-qr">
         <img src="${d.qr}" alt="QR Code" />
         <div class="qr-code-label">#${esc(d.code)}</div>
+      </div>
+    </div>
+    <div class="body-area">
+      ${d.image ? `<div class="watermark" style="background-image: url('${esc(d.image)}');"></div>` : ''}
+      <div class="body-content">
+        <div class="artwork-col">
+          <div class="artwork-frame">
+            ${d.image ? `<img src="${esc(d.image)}" alt="${esc(d.title)}" />` : '<div style="width:100%;height:380px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;color:#999;font-size:16px;">Artwork Image</div>'}
+          </div>
+        </div>
+        <div class="details-col">
+          <div class="section-header">Details</div>
+          <div class="detail-row"><span class="detail-label">Artist:</span><span class="detail-value">${esc(d.artist)}</span></div>
+          <div class="detail-row"><span class="detail-label">Title:</span><span class="detail-value">${esc(d.title)}</span></div>
+          ${d.medium ? `<div class="detail-row"><span class="detail-label">Medium:</span><span class="detail-value">${esc(d.medium)}</span></div>` : ''}
+          ${d.dims ? `<div class="detail-row"><span class="detail-label">Dimensions:</span><span class="detail-value">${esc(d.dims)}</span></div>` : ''}
+          ${d.edition ? `<div class="detail-row"><span class="detail-label">Edition:</span><span class="detail-value">${esc(d.edition)}</span></div>` : ''}
+          ${d.condition ? `<div class="detail-row"><span class="detail-label">Condition:</span><span class="detail-value">${esc(d.condition)}</span></div>` : ''}
+          <div class="section-gap"></div>
+          <div class="section-header">Digital Authentication</div>
+          <div class="detail-row"><span class="detail-label">Blockchain:</span><span class="detail-value">${esc(d.blockchainUrl)}</span></div>
+          <div class="detail-row"><span class="detail-label">Certificate:</span><span class="detail-value">${esc(d.code)}</span></div>
+          <div class="detail-row"><span class="detail-label">Date:</span><span class="detail-value">${esc(d.transactionDate)}</span></div>
+          <div class="detail-row"><span class="detail-label">Assignor:</span><span class="detail-value">TrueCOA</span></div>
+          <div class="detail-row"><span class="detail-label">Assignee:</span><span class="detail-value">${esc(d.assignee)}</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bar">
+      <div class="footer-left">
+        <span class="powered-label">Powered by:</span>
+        <div class="footer-logos">
+          <a href="https://scoredetect.com" target="_blank"><img src="${LOGO_SCOREDETECT_URL}" alt="ScoreDetect" style="height:35px;width:auto;" /></a>
+          <a href="https://polygon.technology" target="_blank"><img src="${LOGO_POLYGON_URL}" alt="Polygon" style="height:40px;width:auto;" /></a>
+        </div>
+      </div>
+      <div class="footer-right">
+        <div class="secured-text">Secured on the Polygon blockchain</div>
+        <div class="tagline">Transparent Authenticity</div>
       </div>
     </div>
   </div>
