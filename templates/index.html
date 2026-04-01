@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>News Intelligence System</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0d0d0d;
+  --card: #1c1c1e;
+  --card-hover: #2c2c2e;
+  --border: #38383a;
+  --text: #f5f5f7;
+  --text-dim: #86868b;
+  --accent: #0a84ff;
+  --green: #30d158;
+  --yellow: #ffd60a;
+  --red: #ff453a;
+  --orange: #ff9f0a;
+  --purple: #bf5af2;
+  --cyan: #64d2ff;
+  --chatgpt: #10a37f;
+  --claude: #bf5af2;
+  --gemini: #4285f4;
+  --grok: #ff453a;
+  --perplexity: #64d2ff;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+.container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+/* Header */
+header {
+  text-align: center;
+  padding: 32px 0 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 32px;
+}
+header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, var(--cyan), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+header p { color: var(--text-dim); margin-top: 4px; font-size: 14px; }
+
+/* Pipeline */
+.pipeline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+.pipeline-step {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 20px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.3s;
+  min-width: 120px;
+}
+.pipeline-step.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 16px rgba(10, 132, 255, 0.3);
+}
+.pipeline-step.done {
+  border-color: var(--green);
+  box-shadow: 0 0 12px rgba(48, 209, 88, 0.2);
+}
+.pipeline-arrow { color: var(--text-dim); font-size: 18px; }
+.pipeline-label { display: block; margin-top: 2px; color: var(--text-dim); font-weight: 400; font-size: 11px; }
+
+/* Article cards */
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+.articles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.article-card {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.article-card:hover { background: var(--card-hover); border-color: var(--text-dim); }
+.article-card.selected { border-color: var(--accent); box-shadow: 0 0 16px rgba(10, 132, 255, 0.25); }
+.article-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 6px; line-height: 1.4; }
+.article-meta { font-size: 12px; color: var(--text-dim); display: flex; gap: 12px; margin-bottom: 8px; }
+.article-summary { font-size: 13px; color: var(--text-dim); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.article-tag {
+  display: inline-block;
+  background: rgba(10, 132, 255, 0.15);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+/* Analyze button */
+.analyze-btn {
+  display: block;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto 32px;
+  padding: 14px 32px;
+  background: linear-gradient(135deg, var(--accent), #0066cc);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: -0.3px;
+}
+.analyze-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(10, 132, 255, 0.4); }
+.analyze-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* Progress */
+.progress-section { margin-bottom: 32px; display: none; }
+.progress-bar-container {
+  background: var(--card);
+  border-radius: 8px;
+  height: 6px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--cyan));
+  border-radius: 8px;
+  width: 0%;
+  transition: width 0.4s ease;
+}
+.progress-text { font-size: 13px; color: var(--text-dim); text-align: center; }
+
+/* AI Model cards */
+.ai-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
+}
+@media (max-width: 900px) { .ai-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 600px) { .ai-grid { grid-template-columns: repeat(2, 1fr); } }
+.ai-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  transition: all 0.3s;
+}
+.ai-card .dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+  background: var(--text-dim);
+  transition: background 0.3s;
+}
+.ai-card.online .dot { background: var(--green); box-shadow: 0 0 8px rgba(48, 209, 88, 0.5); }
+.ai-card.scoring .dot { background: var(--yellow); animation: pulse 1s infinite; }
+.ai-card.scored .dot { background: var(--green); }
+.ai-card .name { font-size: 14px; font-weight: 600; }
+.ai-card .status { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+.ai-card .score-display {
+  font-size: 28px;
+  font-weight: 700;
+  margin-top: 8px;
+  display: none;
+}
+.ai-card.scored .score-display { display: block; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Results */
+.results-section { display: none; }
+
+.scores-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.scores-panel h3 { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
+
+.score-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.score-row .model-name { width: 90px; font-size: 13px; font-weight: 600; }
+.score-bar-bg {
+  flex: 1;
+  height: 24px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+.score-bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.6s ease;
+  width: 0%;
+}
+.score-value { width: 50px; text-align: right; font-size: 14px; font-weight: 700; }
+
+.score-detail {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+.score-detail .model-header {
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.score-detail .reasoning { color: var(--text-dim); margin-bottom: 6px; }
+.tag-green { color: var(--green); font-size: 12px; }
+.tag-yellow { color: var(--yellow); font-size: 12px; }
+
+/* Peer review */
+.peer-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+.peer-table th { text-align: left; font-size: 12px; color: var(--text-dim); padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.peer-table td { font-size: 13px; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.badge-agree { background: rgba(48, 209, 88, 0.15); color: var(--green); }
+.badge-disagree { background: rgba(255, 214, 10, 0.15); color: var(--yellow); }
+
+/* Fact checks */
+.fact-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.fact-claim { flex: 1; font-size: 13px; }
+.fact-verdict { font-size: 12px; font-weight: 600; }
+
+/* Consensus */
+.consensus-box {
+  text-align: center;
+  padding: 32px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  margin-bottom: 16px;
+}
+.consensus-score {
+  font-size: 72px;
+  font-weight: 800;
+  letter-spacing: -2px;
+  line-height: 1;
+}
+.consensus-label { font-size: 14px; color: var(--text-dim); margin-top: 4px; }
+.consensus-meta { display: flex; justify-content: center; gap: 32px; margin-top: 16px; font-size: 13px; }
+.consensus-meta span { color: var(--text-dim); }
+.consensus-meta strong { color: var(--text); }
+
+/* Insights */
+.insight-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.insight-row:last-child { border: none; }
+.insight-category { font-size: 12px; font-weight: 600; letter-spacing: 0.5px; color: var(--text-dim); }
+.insight-rating { font-size: 13px; font-weight: 600; }
+.insight-details { font-size: 12px; color: var(--text-dim); }
+
+/* Two column layout for results */
+.results-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+@media (max-width: 800px) { .results-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>News Intelligence System</h1>
+    <p>Multi-AI Article Scoring &mdash; 5 models, 1 consensus</p>
+  </header>
+
+  <!-- Pipeline visualization -->
+  <div class="pipeline">
+    <div class="pipeline-step" id="pipe-fetch">News Source<span class="pipeline-label">Fetch articles</span></div>
+    <span class="pipeline-arrow">&rarr;</span>
+    <div class="pipeline-step" id="pipe-health">Health Check<span class="pipeline-label">Verify APIs</span></div>
+    <span class="pipeline-arrow">&rarr;</span>
+    <div class="pipeline-step" id="pipe-score">AI Scoring<span class="pipeline-label">5 models</span></div>
+    <span class="pipeline-arrow">&rarr;</span>
+    <div class="pipeline-step" id="pipe-peer">Peer Review<span class="pipeline-label">Cross-check</span></div>
+    <span class="pipeline-arrow">&rarr;</span>
+    <div class="pipeline-step" id="pipe-fact">Fact Check<span class="pipeline-label">Perplexity</span></div>
+    <span class="pipeline-arrow">&rarr;</span>
+    <div class="pipeline-step" id="pipe-consensus">Consensus<span class="pipeline-label">Final score</span></div>
+  </div>
+
+  <!-- Articles -->
+  <div class="section-title">Select an Article to Analyze</div>
+  <div class="articles-grid" id="articles-grid"></div>
+
+  <!-- Analyze button -->
+  <button class="analyze-btn" id="analyze-btn" disabled onclick="startAnalysis()">Select an Article</button>
+
+  <!-- Progress -->
+  <div class="progress-section" id="progress-section">
+    <div class="progress-bar-container"><div class="progress-bar" id="progress-bar"></div></div>
+    <div class="progress-text" id="progress-text">Starting analysis...</div>
+  </div>
+
+  <!-- AI Model status cards -->
+  <div class="section-title">AI Models</div>
+  <div class="ai-grid" id="ai-grid">
+    <div class="ai-card" id="ai-ChatGPT"><span class="dot"></span><span class="name">ChatGPT</span><div class="status">Idle</div><div class="score-display" style="color:var(--chatgpt)"></div></div>
+    <div class="ai-card" id="ai-Claude"><span class="dot"></span><span class="name">Claude</span><div class="status">Idle</div><div class="score-display" style="color:var(--claude)"></div></div>
+    <div class="ai-card" id="ai-Gemini"><span class="dot"></span><span class="name">Gemini</span><div class="status">Idle</div><div class="score-display" style="color:var(--gemini)"></div></div>
+    <div class="ai-card" id="ai-Grok"><span class="dot"></span><span class="name">Grok</span><div class="status">Idle</div><div class="score-display" style="color:var(--grok)"></div></div>
+    <div class="ai-card" id="ai-Perplexity"><span class="dot"></span><span class="name">Perplexity</span><div class="status">Idle</div><div class="score-display" style="color:var(--perplexity)"></div></div>
+  </div>
+
+  <!-- Results -->
+  <div class="results-section" id="results-section">
+    <!-- Consensus at top -->
+    <div class="consensus-box" id="consensus-box">
+      <div class="consensus-score" id="consensus-score">--</div>
+      <div class="consensus-label">AI Radar Score (out of 10)</div>
+      <div class="consensus-meta">
+        <span>Confidence: <strong id="consensus-confidence">--</strong></span>
+        <span>Variance: <strong id="consensus-variance">--</strong></span>
+        <span>Action: <strong id="consensus-rec">--</strong></span>
+      </div>
+    </div>
+
+    <!-- Score bars + Details side by side -->
+    <div class="results-grid">
+      <div class="scores-panel">
+        <h3>Individual Scores</h3>
+        <div id="score-bars"></div>
+      </div>
+      <div class="scores-panel">
+        <h3>Peer Review</h3>
+        <table class="peer-table" id="peer-table">
+          <thead><tr><th>AI 1</th><th>Score</th><th></th><th>AI 2</th><th>Score</th><th>Result</th></tr></thead>
+          <tbody id="peer-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="results-grid">
+      <div class="scores-panel">
+        <h3>Fact Check</h3>
+        <div id="fact-checks"></div>
+      </div>
+      <div class="scores-panel">
+        <h3>Key Insights</h3>
+        <div id="insights-panel"></div>
+      </div>
+    </div>
+
+    <!-- Detailed rationales -->
+    <div class="scores-panel">
+      <h3>AI Rationales</h3>
+      <div id="score-details"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const modelColors = {
+  ChatGPT: '#10a37f', Claude: '#bf5af2', Gemini: '#4285f4',
+  Grok: '#ff453a', Perplexity: '#64d2ff'
+};
+
+let articles = [];
+let selectedIndex = -1;
+
+// Load articles on page load
+fetch('/api/articles')
+  .then(r => r.json())
+  .then(data => {
+    articles = data;
+    const grid = document.getElementById('articles-grid');
+    articles.forEach((a, i) => {
+      const card = document.createElement('div');
+      card.className = 'article-card';
+      card.onclick = () => selectArticle(i);
+      card.id = 'article-' + i;
+      card.innerHTML = `
+        ${a.category ? `<span class="article-tag">${a.category}</span>` : ''}
+        <h3>${a.title}</h3>
+        <div class="article-meta">
+          <span>${a.source}</span>
+          <span>${a.date}</span>
+        </div>
+        <div class="article-summary">${a.summary}</div>
+      `;
+      grid.appendChild(card);
+    });
+  });
+
+function selectArticle(idx) {
+  document.querySelectorAll('.article-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('article-' + idx).classList.add('selected');
+  selectedIndex = idx;
+  const btn = document.getElementById('analyze-btn');
+  btn.disabled = false;
+  btn.textContent = 'Analyze Article';
+}
+
+function resetUI() {
+  document.querySelectorAll('.ai-card').forEach(c => {
+    c.className = 'ai-card';
+    c.querySelector('.status').textContent = 'Idle';
+    c.querySelector('.score-display').textContent = '';
+  });
+  document.querySelectorAll('.pipeline-step').forEach(s => { s.className = 'pipeline-step'; });
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('score-bars').innerHTML = '';
+  document.getElementById('score-details').innerHTML = '';
+  document.getElementById('peer-body').innerHTML = '';
+  document.getElementById('fact-checks').innerHTML = '';
+  document.getElementById('insights-panel').innerHTML = '';
+}
+
+function setPipelineStep(id, state) {
+  const el = document.getElementById(id);
+  el.classList.remove('active', 'done');
+  if (state) el.classList.add(state);
+}
+
+function setProgress(pct, text) {
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = text;
+}
+
+function startAnalysis() {
+  if (selectedIndex < 0) return;
+  resetUI();
+
+  const btn = document.getElementById('analyze-btn');
+  btn.disabled = true;
+  btn.textContent = 'Analyzing...';
+
+  const progress = document.getElementById('progress-section');
+  progress.style.display = 'block';
+  setProgress(0, 'Starting analysis...');
+
+  fetch('/api/analyze', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({article_index: selectedIndex})
+  })
+  .then(r => r.json())
+  .then(data => {
+    const es = new EventSource('/api/analyze/stream?session_id=' + data.session_id);
+
+    es.addEventListener('step', e => {
+      const d = JSON.parse(e.data);
+      const stepMap = {
+        health_check: ['pipe-health', 10, 'Checking AI engines...'],
+        health_check_done: ['pipe-health', 20, 'All AI engines online'],
+        scoring: ['pipe-score', 30, 'AI models scoring article...'],
+        peer_review: ['pipe-peer', 60, 'Peer review in progress...'],
+        fact_check: ['pipe-fact', 75, 'Fact-checking claims...'],
+        consensus: ['pipe-consensus', 85, 'Calculating consensus...'],
+        insights: ['pipe-consensus', 92, 'Generating insights...'],
+        done: [null, 100, 'Analysis complete!'],
+      };
+      const info = stepMap[d.step];
+      if (!info) return;
+
+      // Mark previous steps as done
+      const pipes = ['pipe-fetch', 'pipe-health', 'pipe-score', 'pipe-peer', 'pipe-fact', 'pipe-consensus'];
+      if (info[0]) {
+        const idx = pipes.indexOf(info[0]);
+        pipes.slice(0, idx).forEach(p => setPipelineStep(p, 'done'));
+        setPipelineStep(info[0], 'active');
+      } else {
+        pipes.forEach(p => setPipelineStep(p, 'done'));
+      }
+      setProgress(info[1], info[2]);
+
+      if (d.step === 'scoring') {
+        document.querySelectorAll('.ai-card').forEach(c => {
+          c.classList.add('scoring');
+          c.querySelector('.status').textContent = 'Scoring...';
+        });
+      }
+      if (d.step === 'done') {
+        document.getElementById('results-section').style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Analyze Article';
+      }
+    });
+
+    es.addEventListener('health', e => {
+      const d = JSON.parse(e.data);
+      const card = document.getElementById('ai-' + d.model);
+      card.classList.add('online');
+      card.querySelector('.status').textContent = `Online (${d.latency}ms)`;
+    });
+
+    es.addEventListener('score', e => {
+      const d = JSON.parse(e.data);
+      const card = document.getElementById('ai-' + d.model);
+      card.classList.remove('scoring');
+      card.classList.add('scored');
+      card.querySelector('.status').textContent = 'Scored';
+      card.querySelector('.score-display').textContent = d.score + '/10';
+
+      // Add score bar
+      const bars = document.getElementById('score-bars');
+      const color = modelColors[d.model];
+      bars.innerHTML += `
+        <div class="score-row">
+          <div class="model-name" style="color:${color}">${d.model}</div>
+          <div class="score-bar-bg">
+            <div class="score-bar-fill" style="background:${color};width:${d.score * 10}%"></div>
+          </div>
+          <div class="score-value">${d.score}/10</div>
+        </div>`;
+
+      // Add detail card
+      const details = document.getElementById('score-details');
+      details.innerHTML += `
+        <div class="score-detail">
+          <div class="model-header"><span style="color:${color}">${d.model}</span> &mdash; ${d.score}/10</div>
+          <div class="reasoning">${d.reasoning}</div>
+          <div class="tag-green">Strengths: ${d.strengths.join(', ')}</div>
+          <div class="tag-yellow">Concerns: ${d.concerns.join(', ')}</div>
+        </div>`;
+    });
+
+    es.addEventListener('peer', e => {
+      const d = JSON.parse(e.data);
+      const badge = d.result === 'AGREEMENT' ? 'badge-agree' : 'badge-disagree';
+      document.getElementById('peer-body').innerHTML += `
+        <tr>
+          <td style="color:${modelColors[d.ai1]}">${d.ai1}</td>
+          <td>${d.score1}/10</td>
+          <td style="color:var(--text-dim)">vs</td>
+          <td style="color:${modelColors[d.ai2]}">${d.ai2}</td>
+          <td>${d.score2}/10</td>
+          <td><span class="badge ${badge}">${d.result}</span></td>
+        </tr>`;
+    });
+
+    es.addEventListener('facts', e => {
+      const d = JSON.parse(e.data);
+      const container = document.getElementById('fact-checks');
+      d.checks.forEach(c => {
+        const color = c.verdict === 'VERIFIED' ? 'var(--green)' : 'var(--yellow)';
+        container.innerHTML += `
+          <div class="fact-row">
+            <div class="fact-claim">${c.claim}</div>
+            <div class="fact-verdict" style="color:${color}">${c.verdict}</div>
+          </div>
+          <div style="font-size:12px;color:var(--text-dim);padding:0 0 8px">${c.details}</div>`;
+      });
+    });
+
+    es.addEventListener('consensus', e => {
+      const d = JSON.parse(e.data);
+      const scoreEl = document.getElementById('consensus-score');
+      scoreEl.textContent = d.score;
+      scoreEl.style.color = d.score >= 7.5 ? 'var(--green)' : d.score >= 5 ? 'var(--yellow)' : 'var(--red)';
+      document.getElementById('consensus-confidence').textContent = d.confidence;
+      document.getElementById('consensus-variance').textContent = '\u00b1' + d.variance;
+      document.getElementById('consensus-rec').textContent = d.recommendation;
+    });
+
+    es.addEventListener('insights', e => {
+      const d = JSON.parse(e.data);
+      const panel = document.getElementById('insights-panel');
+      d.insights.forEach(ins => {
+        const ratingColor = ins.rating.toLowerCase().includes('high') || ins.rating.toLowerCase().includes('excellent')
+          ? 'var(--green)' : ins.rating.toLowerCase().includes('moderate') ? 'var(--yellow)' : 'var(--cyan)';
+        panel.innerHTML += `
+          <div class="insight-row">
+            <div>
+              <div class="insight-category">${ins.category}</div>
+              <div class="insight-details">${ins.details}</div>
+            </div>
+            <div class="insight-rating" style="color:${ratingColor}">${ins.rating}</div>
+          </div>`;
+      });
+    });
+
+    es.addEventListener('done', () => { es.close(); });
+    es.onerror = () => { es.close(); };
+  });
+}
+
+// Mark first pipeline step on load
+setPipelineStep('pipe-fetch', 'done');
+</script>
+</body>
+</html>
