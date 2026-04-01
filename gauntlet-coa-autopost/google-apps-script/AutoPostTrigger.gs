@@ -33,10 +33,10 @@ function getAutoPostConfig() {
     WEBHOOK_URL: props.getProperty('WEBHOOK_URL') || 'https://coa.up.railway.app/api/automate',
     WEBHOOK_SECRET: props.getProperty('WEBHOOK_SECRET') || '',
     SHEET_NAME: 'COA2',
-    COA_CODE_COL: 0,  // A: COA_Code
-    ARTIST_COL: 2,     // C: Artist
-    TITLE_COL: 3,      // D: Title
-    DONE_COL: 22       // W: Done
+    COA_CODE_COL: 0,   // A: COA_CODE
+    SIGNER_COL: 2,     // C: SIGNER
+    TITLE_COL: 3,      // D: TITLE
+    STATUS_COL: 23     // X: STATUS
   };
 }
 
@@ -105,8 +105,8 @@ function removeAutoPostTrigger() {
  *
  * Checks if the edited row in COA2 has:
  *   - A COA code (column A)
- *   - At least artist OR title filled in
- *   - Done column (W) is empty (not yet processed)
+ *   - At least signer OR title filled in
+ *   - STATUS column (X) is empty (not yet processed)
  *
  * If all conditions met, calls the backend webhook to start processing.
  *
@@ -128,22 +128,22 @@ function onSheetEditAutoPost(e) {
     if (row <= 1) return;
 
     // Get row data
-    const rowData = sheet.getRange(row, 1, 1, 24).getValues()[0];
+    const rowData = sheet.getRange(row, 1, 1, 25).getValues()[0];
 
     // Check required fields
     const coaCode = String(rowData[config.COA_CODE_COL] || '').trim();
-    const artist = String(rowData[config.ARTIST_COL] || '').trim();
+    const signer = String(rowData[config.SIGNER_COL] || '').trim();
     const title = String(rowData[config.TITLE_COL] || '').trim();
-    const done = String(rowData[config.DONE_COL] || '').trim();
+    const status = String(rowData[config.STATUS_COL] || '').trim();
 
     // Skip if no COA code
     if (!coaCode) return;
 
     // Skip if already processed or processing
-    if (done && done !== 'error') return;
+    if (status && status !== 'error') return;
 
-    // Require at least artist or title
-    if (!artist && !title) return;
+    // Require at least signer or title
+    if (!signer && !title) return;
 
     // Call the backend webhook
     Logger.log(`Auto-post triggered for COA: ${coaCode} (Row ${row})`);
@@ -263,7 +263,7 @@ function triggerProcessSelected() {
   }
 
   callWebhook(config, coaCode, row);
-  SpreadsheetApp.getUi().alert(`Processing started for COA: ${coaCode}\nCheck column W for status.`);
+  SpreadsheetApp.getUi().alert(`Processing started for COA: ${coaCode}\nCheck column X for status.`);
 }
 
 /**

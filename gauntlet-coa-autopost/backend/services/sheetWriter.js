@@ -7,31 +7,46 @@
  * Upgrades the existing read-only Sheets integration to read/write.
  *
  * Column mapping (0-indexed, matches COAGenerator_Combined.gs CONFIG.COLUMNS):
- *   A(0):  COA_Code       B(1):  QR_Code        C(2):  Artist
- *   D(3):  Title          E(4):  Date            F(5):  Length
- *   G(6):  Width          H(7):  Number          I(8):  Edition
- *   J(9):  Medium         K(10): Condition        L(11): Description
- *   M(12): Notes          N(13): Assignee         O(14): Image_URL
- *   P(15): SKU            Q(16): COA_Code2        R(17): NFT_TokenID
- *   S(18): Short_URL      T(19): Blockchain_URL   U(20): NFT_URL
- *   V(21): Cert_URL       W(22): Done             X(23): Generated
+ *   A(0):  COA_CODE       B(1):  QR_CODE        C(2):  SIGNER
+ *   D(3):  TITLE          E(4):  ART_DATE       F(5):  LENGTH
+ *   G(6):  WIDTH          H(7):  AUTHENTICATOR  I(8):  AUTH_NUMBER
+ *   J(9):  AUTH_DATE      K(10): CONDITION      L(11): DESCRIPTION
+ *   M(12): EDITION        N(13): MEDIUM         O(14): ASSIGNEE
+ *   P(15): IMAGE_URL      Q(16): SKU            R(17): THIRD_PARTY_COA
+ *   S(18): NFT_TOKEN_ID   T(19): SHORT_URL      U(20): BLOCKCHAIN_URL
+ *   V(21): NFT_URL        W(22): CERT_URL       X(23): STATUS
+ *   Y(24): COMPLETION_DATE
  */
 
 const { google } = require('googleapis');
 
 // Column indices for write-back (0-indexed)
 const COLUMNS = {
-  COA_CODE: 0,
-  QR_CODE: 1,
-  ARTIST: 2,
-  TITLE: 3,
-  NFT_TOKEN_ID: 17,  // R
-  SHORT_URL: 18,      // S
-  BLOCKCHAIN_URL: 19, // T
-  NFT_URL: 20,        // U
-  CERT_URL: 21,       // V
-  DONE: 22,           // W
-  GENERATED: 23       // X
+  COA_CODE: 0,        // A
+  QR_CODE: 1,         // B
+  SIGNER: 2,          // C
+  TITLE: 3,           // D
+  ART_DATE: 4,        // E
+  LENGTH: 5,          // F
+  WIDTH: 6,           // G
+  AUTHENTICATOR: 7,   // H
+  AUTH_NUMBER: 8,     // I
+  AUTH_DATE: 9,       // J
+  CONDITION: 10,      // K
+  DESCRIPTION: 11,    // L
+  EDITION: 12,        // M
+  MEDIUM: 13,         // N
+  ASSIGNEE: 14,       // O
+  IMAGE_URL: 15,      // P
+  SKU: 16,            // Q
+  THIRD_PARTY_COA: 17,// R
+  NFT_TOKEN_ID: 18,   // S
+  SHORT_URL: 19,      // T
+  BLOCKCHAIN_URL: 20, // U
+  NFT_URL: 21,        // V
+  CERT_URL: 22,       // W
+  STATUS: 23,         // X
+  COMPLETION_DATE: 24 // Y
 };
 
 let sheetsClient = null;
@@ -130,10 +145,10 @@ async function writeResults(rowNumber, results) {
     updates.push([colToLetter(COLUMNS.SHORT_URL), results.shortUrl]);
   }
 
-  // Always update the Done/status column
+  // Always update the Status/completion column
   const status = results.status || new Date().toISOString();
-  updates.push([colToLetter(COLUMNS.DONE), status]);
-  updates.push([colToLetter(COLUMNS.GENERATED), new Date().toISOString()]);
+  updates.push([colToLetter(COLUMNS.STATUS), status]);
+  updates.push([colToLetter(COLUMNS.COMPLETION_DATE), new Date().toISOString()]);
 
   // Batch update all cells
   const data = updates.map(([col, value]) => ({
@@ -158,13 +173,13 @@ async function writeResults(rowNumber, results) {
 async function setRowStatus(rowNumber, status) {
   const spreadsheetId = process.env.SPREADSHEET_ID;
   const sheetName = process.env.SHEET_NAME || 'COA2';
-  await updateCell(spreadsheetId, sheetName, rowNumber, COLUMNS.DONE, status);
+  await updateCell(spreadsheetId, sheetName, rowNumber, COLUMNS.STATUS, status);
 }
 
 /**
- * Get all unprocessed rows (COA code present, Done column empty)
+ * Get all unprocessed rows (COA code present, STATUS column empty)
  *
- * @returns {Promise<Array>} Array of { rowNumber, coaCode, artist, title, ... }
+ * @returns {Promise<Array>} Array of { rowNumber, coaCode, signer, title, ... }
  */
 async function getUnprocessedRows() {
   const spreadsheetId = process.env.SPREADSHEET_ID;
@@ -174,7 +189,7 @@ async function getUnprocessedRows() {
 
   const response = await sheetsClient.spreadsheets.values.get({
     spreadsheetId,
-    range: `${sheetName}!A:X`
+    range: `${sheetName}!A:Y`
   });
 
   const rows = response.data.values;
@@ -185,34 +200,39 @@ async function getUnprocessedRows() {
   for (let i = 1; i < rows.length; i++) {
     const row = rows[i];
     const coaCode = (row[COLUMNS.COA_CODE] || '').toString().trim();
-    const artist = (row[COLUMNS.ARTIST] || '').toString().trim();
+    const signer = (row[COLUMNS.SIGNER] || '').toString().trim();
     const title = (row[COLUMNS.TITLE] || '').toString().trim();
-    const doneStatus = (row[COLUMNS.DONE] || '').toString().trim();
-    const imageUrl = (row[14] || '').toString().trim(); // O: Image_URL
+    const status = (row[COLUMNS.STATUS] || '').toString().trim();
+    const imageUrl = (row[COLUMNS.IMAGE_URL] || '').toString().trim();
 
     // Skip rows without COA code or required fields
     if (!coaCode) continue;
 
     // Skip rows already processed or currently processing
-    if (doneStatus && doneStatus !== 'error') continue;
+    if (status && status !== 'error') continue;
 
-    // Require at least artist or title to be filled in
-    if (!artist && !title) continue;
+    // Require at least signer or title to be filled in
+    if (!signer && !title) continue;
 
     unprocessed.push({
       rowNumber: i + 1, // 1-indexed for Sheets API
       coaCode,
-      artist,
+      signer,
       title,
-      date: (row[4] || '').toString().trim(),
-      medium: (row[9] || '').toString().trim(),
-      condition: (row[10] || '').toString().trim(),
-      description: (row[11] || '').toString().trim(),
-      provenance: (row[12] || '').toString().trim(),
-      assignee: (row[13] || '').toString().trim(),
+      artDate: (row[COLUMNS.ART_DATE] || '').toString().trim(),
+      length: (row[COLUMNS.LENGTH] || '').toString().trim(),
+      width: (row[COLUMNS.WIDTH] || '').toString().trim(),
+      authenticator: (row[COLUMNS.AUTHENTICATOR] || '').toString().trim(),
+      authNumber: (row[COLUMNS.AUTH_NUMBER] || '').toString().trim(),
+      authDate: (row[COLUMNS.AUTH_DATE] || '').toString().trim(),
+      condition: (row[COLUMNS.CONDITION] || '').toString().trim(),
+      description: (row[COLUMNS.DESCRIPTION] || '').toString().trim(),
+      edition: (row[COLUMNS.EDITION] || '').toString().trim(),
+      medium: (row[COLUMNS.MEDIUM] || '').toString().trim(),
+      assignee: (row[COLUMNS.ASSIGNEE] || '').toString().trim(),
       imageUrl,
-      sku: (row[15] || '').toString().trim(),
-      edition: row[7] && row[8] ? `${row[7]} of ${row[8]}` : '',
+      sku: (row[COLUMNS.SKU] || '').toString().trim(),
+      thirdPartyCoa: (row[COLUMNS.THIRD_PARTY_COA] || '').toString().trim(),
       shortUrl: (row[COLUMNS.SHORT_URL] || '').toString().trim()
     });
   }

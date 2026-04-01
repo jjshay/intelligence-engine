@@ -29,12 +29,12 @@ const processing = new Set();
  * @param {Object} rowData - Row data from getUnprocessedRows()
  * @param {number} rowData.rowNumber - Sheet row number
  * @param {string} rowData.coaCode - COA code
- * @param {string} rowData.artist - Artist name
+ * @param {string} rowData.signer - Signer name
  * @param {string} rowData.title - Title
  * @returns {Promise<Object>} Pipeline result
  */
 async function processRow(rowData) {
-  const { rowNumber, coaCode, artist, title } = rowData;
+  const { rowNumber, coaCode, signer, title } = rowData;
 
   // Prevent duplicate processing
   if (processing.has(coaCode)) {
@@ -51,11 +51,11 @@ async function processRow(rowData) {
     console.log(`\n========== Processing COA ${coaCode} (Row ${rowNumber}) ==========`);
 
     // --- Step 1: Validate ---
-    if (!coaCode || (!artist && !title)) {
-      throw new Error('Missing required fields: coaCode and (artist or title)');
+    if (!coaCode || (!signer && !title)) {
+      throw new Error('Missing required fields: coaCode and (signer or title)');
     }
     results.steps.validate = { success: true };
-    console.log(`[1/4] Validated: "${title}" by ${artist}`);
+    console.log(`[1/4] Validated: "${title}" by ${signer}`);
 
     // --- Step 2: Mint NFT on Polygon ---
     try {
@@ -80,7 +80,7 @@ async function processRow(rowData) {
     try {
       const certResult = await createCertificate({
         coaCode,
-        artist,
+        signer,
         title,
         description: rowData.description,
         medium: rowData.medium,
