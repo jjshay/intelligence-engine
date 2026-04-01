@@ -36,7 +36,7 @@ function getAutoPostConfig() {
     COA_CODE_COL: 0,   // A: COA_CODE
     SIGNER_COL: 2,     // C: SIGNER
     TITLE_COL: 3,      // D: TITLE
-    STATUS_COL: 23     // X: STATUS
+    STATUS_COL: 19     // T: STATUS
   };
 }
 
@@ -106,7 +106,7 @@ function removeAutoPostTrigger() {
  * Checks if the edited row in COA2 has:
  *   - A COA code (column A)
  *   - At least signer OR title filled in
- *   - STATUS column (X) is empty (not yet processed)
+ *   - STATUS column (T) is empty (not yet processed)
  *
  * If all conditions met, calls the backend webhook to start processing.
  *
@@ -128,7 +128,7 @@ function onSheetEditAutoPost(e) {
     if (row <= 1) return;
 
     // Get row data
-    const rowData = sheet.getRange(row, 1, 1, 25).getValues()[0];
+    const rowData = sheet.getRange(row, 1, 1, 21).getValues()[0];
 
     // Check required fields
     const coaCode = String(rowData[config.COA_CODE_COL] || '').trim();
@@ -263,7 +263,7 @@ function triggerProcessSelected() {
   }
 
   callWebhook(config, coaCode, row);
-  SpreadsheetApp.getUi().alert(`Processing started for COA: ${coaCode}\nCheck column X for status.`);
+  SpreadsheetApp.getUi().alert(`Processing started for COA: ${coaCode}\nCheck column T for status.`);
 }
 
 /**

@@ -88,13 +88,28 @@ npm install
    - Writes token ID, URLs, and timestamp back to the sheet
 4. **Polling fallback** runs every 3 minutes to catch anything the trigger missed
 
-## Sheet Columns Written
+## Sheet Column Mapping (COA2, 21 columns A-U)
 
-| Column | Field | Example |
-|--------|-------|---------|
-| R (17) | NFT_TokenID | `5` |
-| T (19) | Blockchain_URL | `https://polygonscan.com/token/0xD554.../...` |
-| U (20) | NFT_URL | `https://opensea.io/assets/matic/0xD554.../5` |
-| V (21) | Cert_URL | ScoreDetect certificate URL |
-| W (22) | Done | ISO timestamp or `error: message` |
-| X (23) | Generated | ISO timestamp |
+| Column | Index | Field | Description |
+|--------|-------|-------|-------------|
+| A | 0 | COA_CODE | COA identifier |
+| B | 1 | QR_CODE | QR code image URL (output) |
+| C | 2 | SIGNER | Artist / signer name |
+| D | 3 | TITLE | Artwork title |
+| E | 4 | DATE | Date of artwork |
+| F | 5 | SIZE | Dimensions |
+| G | 6 | CONDITION | Condition of artwork |
+| H | 7 | DESCRIPTION | Description |
+| I | 8 | PROVENANCE | Provenance (header: "Provience") |
+| J | 9 | EDITION | Edition info |
+| K | 10 | MEDIUM | Medium |
+| L | 11 | ASSIGNEE | Assignee |
+| M | 12 | THIRD_PARTY_AUTH_NOTES | Third party auth notes |
+| N | 13 | IMAGE_URL | Image URL |
+| O | 14 | NFT_TOKEN_ID | NFT token ID (output) |
+| P | 15 | SHORT_URL | Bit.ly short URL (output) |
+| Q | 16 | BLOCKCHAIN_URL | Polygonscan URL (output) |
+| R | 17 | NFT_URL | OpenSea URL (output) |
+| S | 18 | CERT_URL | ScoreDetect certificate URL (output) |
+| T | 19 | STATUS | Status / Done timestamp (output) |
+| U | 20 | COMPLETION_DATE | Completion timestamp (output) |

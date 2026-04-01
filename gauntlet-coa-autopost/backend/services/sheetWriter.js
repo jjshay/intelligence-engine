@@ -6,47 +6,42 @@
  * Writes automation results back to Google Sheets.
  * Upgrades the existing read-only Sheets integration to read/write.
  *
- * Column mapping (0-indexed, matches COAGenerator_Combined.gs CONFIG.COLUMNS):
+ * Column mapping (0-indexed, matches COA2 sheet with 21 columns A-U):
  *   A(0):  COA_CODE       B(1):  QR_CODE        C(2):  SIGNER
- *   D(3):  TITLE          E(4):  ART_DATE       F(5):  LENGTH
- *   G(6):  WIDTH          H(7):  AUTHENTICATOR  I(8):  AUTH_NUMBER
- *   J(9):  AUTH_DATE      K(10): CONDITION      L(11): DESCRIPTION
- *   M(12): EDITION        N(13): MEDIUM         O(14): ASSIGNEE
- *   P(15): IMAGE_URL      Q(16): SKU            R(17): THIRD_PARTY_COA
- *   S(18): NFT_TOKEN_ID   T(19): SHORT_URL      U(20): BLOCKCHAIN_URL
- *   V(21): NFT_URL        W(22): CERT_URL       X(23): STATUS
- *   Y(24): COMPLETION_DATE
+ *   D(3):  TITLE          E(4):  DATE           F(5):  SIZE
+ *   G(6):  CONDITION      H(7):  DESCRIPTION    I(8):  PROVENANCE
+ *   J(9):  EDITION        K(10): MEDIUM         L(11): ASSIGNEE
+ *   M(12): THIRD_PARTY_AUTH_NOTES                N(13): IMAGE_URL
+ *   O(14): NFT_TOKEN_ID   P(15): SHORT_URL      Q(16): BLOCKCHAIN_URL
+ *   R(17): NFT_URL        S(18): CERT_URL       T(19): STATUS
+ *   U(20): COMPLETION_DATE
  */
 
 const { google } = require('googleapis');
 
 // Column indices for write-back (0-indexed)
 const COLUMNS = {
-  COA_CODE: 0,        // A
-  QR_CODE: 1,         // B
-  SIGNER: 2,          // C
-  TITLE: 3,           // D
-  ART_DATE: 4,        // E
-  LENGTH: 5,          // F
-  WIDTH: 6,           // G
-  AUTHENTICATOR: 7,   // H
-  AUTH_NUMBER: 8,     // I
-  AUTH_DATE: 9,       // J
-  CONDITION: 10,      // K
-  DESCRIPTION: 11,    // L
-  EDITION: 12,        // M
-  MEDIUM: 13,         // N
-  ASSIGNEE: 14,       // O
-  IMAGE_URL: 15,      // P
-  SKU: 16,            // Q
-  THIRD_PARTY_COA: 17,// R
-  NFT_TOKEN_ID: 18,   // S
-  SHORT_URL: 19,      // T
-  BLOCKCHAIN_URL: 20, // U
-  NFT_URL: 21,        // V
-  CERT_URL: 22,       // W
-  STATUS: 23,         // X
-  COMPLETION_DATE: 24 // Y
+  COA_CODE: 0,                    // A
+  QR_CODE: 1,                     // B
+  SIGNER: 2,                      // C
+  TITLE: 3,                       // D
+  DATE: 4,                        // E
+  SIZE: 5,                        // F
+  CONDITION: 6,                   // G
+  DESCRIPTION: 7,                 // H
+  PROVENANCE: 8,                  // I (header says "Provience" - misspelled)
+  EDITION: 9,                     // J
+  MEDIUM: 10,                     // K
+  ASSIGNEE: 11,                   // L
+  THIRD_PARTY_AUTH_NOTES: 12,     // M
+  IMAGE_URL: 13,                  // N
+  NFT_TOKEN_ID: 14,               // O
+  SHORT_URL: 15,                  // P
+  BLOCKCHAIN_URL: 16,             // Q
+  NFT_URL: 17,                    // R
+  CERT_URL: 18,                   // S
+  STATUS: 19,                     // T
+  COMPLETION_DATE: 20             // U
 };
 
 let sheetsClient = null;
@@ -189,7 +184,7 @@ async function getUnprocessedRows() {
 
   const response = await sheetsClient.spreadsheets.values.get({
     spreadsheetId,
-    range: `${sheetName}!A:Y`
+    range: `${sheetName}!A:U`
   });
 
   const rows = response.data.values;
@@ -219,20 +214,16 @@ async function getUnprocessedRows() {
       coaCode,
       signer,
       title,
-      artDate: (row[COLUMNS.ART_DATE] || '').toString().trim(),
-      length: (row[COLUMNS.LENGTH] || '').toString().trim(),
-      width: (row[COLUMNS.WIDTH] || '').toString().trim(),
-      authenticator: (row[COLUMNS.AUTHENTICATOR] || '').toString().trim(),
-      authNumber: (row[COLUMNS.AUTH_NUMBER] || '').toString().trim(),
-      authDate: (row[COLUMNS.AUTH_DATE] || '').toString().trim(),
+      date: (row[COLUMNS.DATE] || '').toString().trim(),
+      size: (row[COLUMNS.SIZE] || '').toString().trim(),
       condition: (row[COLUMNS.CONDITION] || '').toString().trim(),
       description: (row[COLUMNS.DESCRIPTION] || '').toString().trim(),
+      provenance: (row[COLUMNS.PROVENANCE] || '').toString().trim(),
       edition: (row[COLUMNS.EDITION] || '').toString().trim(),
       medium: (row[COLUMNS.MEDIUM] || '').toString().trim(),
       assignee: (row[COLUMNS.ASSIGNEE] || '').toString().trim(),
+      thirdPartyAuthNotes: (row[COLUMNS.THIRD_PARTY_AUTH_NOTES] || '').toString().trim(),
       imageUrl,
-      sku: (row[COLUMNS.SKU] || '').toString().trim(),
-      thirdPartyCoa: (row[COLUMNS.THIRD_PARTY_COA] || '').toString().trim(),
       shortUrl: (row[COLUMNS.SHORT_URL] || '').toString().trim()
     });
   }
