@@ -1129,11 +1129,12 @@ function generatePDFHTML(d) {
     }
     .header-bar h1 {
       font-family: 'Cinzel', serif;
-      font-size: 32px;
+      font-size: 26px;
       font-weight: 700;
       color: #2c2c3a;
-      letter-spacing: 7px;
+      letter-spacing: 5px;
       text-transform: uppercase;
+      white-space: nowrap;
     }
     .header-qr { text-align: center; flex-shrink: 0; margin-left: 20px; }
     .header-qr img { width: 72px; height: 72px; display: block; }
@@ -1145,7 +1146,7 @@ function generatePDFHTML(d) {
       position: relative;
       background: #f9f9f9;
       padding: 36px;
-      flex: 1;
+      flex: 1 0 auto;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
@@ -1201,13 +1202,14 @@ function generatePDFHTML(d) {
       font-size: 15px;
     }
     .detail-label { font-weight: 600; color: #444; }
-    .detail-value { color: #222; text-align: right; max-width: 60%; word-break: break-word; }
+    .detail-value { color: #222; text-align: right; max-width: 65%; word-break: break-word; }
     .section-gap { height: 28px; }
     /* Footer */
     .footer-bar {
       background: #f0f0f0;
       border-top: 2px solid #ccc;
       padding: 16px 36px;
+      flex-shrink: 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
