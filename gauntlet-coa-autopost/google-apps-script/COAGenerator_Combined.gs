@@ -1103,7 +1103,7 @@ function generatePDFHTML(d) {
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Source+Sans+Pro:ital,wght@0,400;0,600;1,400&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    @page { size: A4; margin: 0; }
+    @page { size: A4; margin: 8mm 10mm 8mm 10mm; }
     body {
       font-family: 'Source Sans Pro', sans-serif;
       background: #fff;
@@ -1111,8 +1111,8 @@ function generatePDFHTML(d) {
       margin: 0;
     }
     .certificate {
-      width: 210mm;
-      min-height: 297mm;
+      width: 190mm;
+      min-height: 281mm;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
@@ -1120,7 +1120,7 @@ function generatePDFHTML(d) {
     /* Header */
     .header-bar {
       background: linear-gradient(135deg, #8a8a8a 0%, #b0b0b0 50%, #8a8a8a 100%);
-      padding: 30px 50px;
+      padding: 24px 36px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -1135,16 +1135,16 @@ function generatePDFHTML(d) {
       letter-spacing: 7px;
       text-transform: uppercase;
     }
-    .header-qr { text-align: center; flex-shrink: 0; margin-left: 24px; }
-    .header-qr img { width: 80px; height: 80px; display: block; }
+    .header-qr { text-align: center; flex-shrink: 0; margin-left: 20px; }
+    .header-qr img { width: 72px; height: 72px; display: block; }
     .header-qr .qr-code-label {
-      font-size: 18px; font-weight: 700; color: #d9534f; margin-top: 5px;
+      font-size: 16px; font-weight: 700; color: #d9534f; margin-top: 4px;
     }
     /* Body */
     .body-area {
       position: relative;
       background: #f9f9f9;
-      padding: 50px;
+      padding: 36px;
       flex: 1;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
@@ -1165,10 +1165,10 @@ function generatePDFHTML(d) {
       position: relative;
       z-index: 1;
       display: flex;
-      gap: 50px;
+      gap: 36px;
     }
     /* Artwork */
-    .artwork-col { flex: 0 0 320px; }
+    .artwork-col { flex: 0 0 280px; }
     .artwork-frame {
       border: 6px solid #c0c0c0;
       box-shadow: 2px 2px 8px rgba(0,0,0,0.12);
@@ -1207,7 +1207,7 @@ function generatePDFHTML(d) {
     .footer-bar {
       background: #f0f0f0;
       border-top: 2px solid #ccc;
-      padding: 20px 50px;
+      padding: 16px 36px;
       display: flex;
       justify-content: space-between;
       align-items: center;
