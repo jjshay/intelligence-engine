@@ -651,7 +651,7 @@ class AppleStyleGUI:
                         self.root.after(0, lambda: self.update_tech_status('ai', True))
 
                 except Exception as e:
-                    self.root.after(0, lambda: self.update_status(f"Warning: Could not load API keys: {e}", 50))
+                    self.root.after(0, lambda err=e: self.update_status(f"Warning: Could not load API keys: {err}", 50))
 
                 self.root.after(0, lambda: self.update_status("Loading Feedly RSS feed...", 60))
                 self.refresh_rss_feed()
@@ -679,9 +679,9 @@ class AppleStyleGUI:
                 self.root.after(0, lambda: self.connect_btn.configure(text="Reconnect", bg=self.colors['bg_input']))
 
             except Exception as e:
-                self.root.after(0, lambda: self.update_status(f"Connection failed: {str(e)}", 0))
+                self.root.after(0, lambda err=e: self.update_status(f"Connection failed: {str(err)}", 0))
                 self.root.after(0, lambda: self.update_progress_title("Error"))
-                self.root.after(0, lambda: messagebox.showerror("Connection Error", str(e)))
+                self.root.after(0, lambda err=e: messagebox.showerror("Connection Error", str(err)))
 
         threading.Thread(target=connect_thread, daemon=True).start()
 
@@ -824,8 +824,8 @@ class AppleStyleGUI:
                 self.root.after(0, lambda: self.update_progress_title("Complete"))
 
             except Exception as e:
-                self.root.after(0, lambda: self.update_status(f"Error: {str(e)}", 0))
-                self.root.after(0, lambda: messagebox.showerror("Processing Error", str(e)))
+                self.root.after(0, lambda err=e: self.update_status(f"Error: {str(err)}", 0))
+                self.root.after(0, lambda err=e: messagebox.showerror("Processing Error", str(err)))
 
             finally:
                 self.is_processing = False
