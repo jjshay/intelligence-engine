@@ -1,18 +1,19 @@
 # News Intelligence System
 
-![CI](https://github.com/jjshay/news-intelligence/workflows/CI/badge.svg)
-![CodeQL](https://github.com/jjshay/news-intelligence/workflows/CodeQL/badge.svg)
-[![codecov](https://codecov.io/gh/jjshay/news-intelligence/branch/main/graph/badge.svg)](https://codecov.io/gh/jjshay/news-intelligence)
-![Release](https://img.shields.io/github/v/release/jjshay/news-intelligence)
+<!-- portfolio-navigation:start -->
+[Project brief](docs/PROJECT_BRIEF.md) · [Structured project record](project.json) · [Portfolio](https://github.com/jjshay)
+
+<!-- portfolio-navigation:end -->
+
+![CI](https://github.com/jjshay/intelligence-engine/workflows/CI/badge.svg)
+![CodeQL](https://github.com/jjshay/intelligence-engine/workflows/CodeQL/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.9+-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![AI Models](https://img.shields.io/badge/AI%20Models-5-purple.svg)
 
 **Score and analyze news articles using 5 different AI models - get the smartest insights from multiple perspectives.**
 
-[![Demo](https://asciinema.org/a/yQkrIW7LSJ7ym5sb.svg)](https://asciinema.org/a/yQkrIW7LSJ7ym5sb)
 
-[![Watch Demo](https://img.shields.io/badge/▶%20Watch%20Demo-Click%20to%20Play-red?style=for-the-badge&logo=asciinema)](https://asciinema.org/a/yQkrIW7LSJ7ym5sb)
 
 ---
 
@@ -34,7 +35,7 @@ This tool helps you evaluate news articles using multiple AI "judges":
 
 ```bash
 # Clone the repo
-git clone https://github.com/jjshay/news-intelligence.git
+git clone https://github.com/jjshay/intelligence-engine.git
 cd news-intelligence
 
 # Install dependencies

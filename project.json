@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "name": "intelligence-engine",
+  "title": "News Intelligence Engine",
+  "category": "AI and market intelligence",
+  "summary": "News triage needs a repeatable way to compare relevance and model disagreement.",
+  "status": "Source available; runtime not revalidated in this documentation review",
+  "visibility": "public",
+  "reviewed_on": "2026-09-11",
+  "reviewed_commit": "b80bc15394a3587f31226cdb5f5b20b5f54b05db",
+  "architecture": "News intake \u2192 scoring providers \u2192 combined analysis \u2192 operator review and downstream content workflows.",
+  "evidence": [
+    {
+      "path": "process_news_in.py",
+      "role": "Implementation component supporting the data flow described above."
+    },
+    {
+      "path": "fetch_news.py",
+      "role": "Implementation component supporting the data flow described above."
+    },
+    {
+      "path": "tests/test_scoring.py",
+      "role": "Behavioral test source; inspect fixtures and assertions before interpreting coverage."
+    }
+  ],
+  "validation": "Repository tree and referenced source reviewed. Existing application tests, hosted deployments, paid providers, and external mutations were not re-run in this documentation review.",
+  "limitations": "Model diversity can expose different interpretations; agreement does not establish factual correctness.",
+  "next_improvement": "Compare rankings with a human-labeled article set, recording provider versions, missing responses, and evaluation dates.",
+  "related_repositories": [
+    "TradeWatch",
+    "ai-book",
+    "ai-book-updater",
+    "jj-market-alert"
+  ]
+}
